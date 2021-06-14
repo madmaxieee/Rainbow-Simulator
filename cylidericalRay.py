@@ -7,19 +7,20 @@ nwater = [1.3320, 1.3325, 1.3331, 1.3349, 1.3390, 1.3435]
 
 class Ray:
     def __init__(self, _pos=vec(0, 0, 0), angle=0):
+        self.incidence_y = _pos.y
         _pos = rotate(_pos, -angle)
         self.pos = np.array([], dtype=vec)
         self.v = np.array([], dtype=vec)
         self.axis = []
         self.log = [[], [], [], [], [], []]
         self.opacity = [[], [], [], [], [], []]
+        self.exit_angles=[]
         self.dt = 0.001
 
         self.in_lens = [False, False, False, False, False, False]
         self.reflected = [0, 0, 0, 0, 0, 0]
 
-        self.angle_labels = []
-        self.amplitude_labels = []
+        # self.angle_labels = []
 
         for i in range(6):
             self.v = np.append(self.v, vec(cos(-angle), sin(-angle), 0))
@@ -74,8 +75,8 @@ class Ray:
                         opacity=self.opacity[i][1] * self.opacity[i][0]
                     )
                 )
-                print(
-                    f'self.opacity[{i}][1] = {self.opacity[i][1] * self.opacity[i][0]}')
+                # print(
+                #     f'self.opacity[{i}][1] = {self.opacity[i][1] * self.opacity[i][0]}')
                 self.beams[i].append(
                     cylinder(
                         pos=self.log[i][2],
@@ -100,13 +101,14 @@ class Ray:
                 axis=cross(normal_v, self.v[i])
             )
             if type == 'out' and (i == 0 or i == 5) and len(self.beams[i]) == 3:
-                self.angle_labels.append(label(
-                    pos=self.beams[i][2].pos + self.beams[i][2].axis / 2,
-                    text="{0:4.2f}deg".format(diff_angle(
-                        self.v[i], -self.white.axis) * 180/pi),
-                    xoffset=20 if i == 0 else -20,
-                    yoffset=-5 if i == 0 else 5
-                ))
+                self.exit_angles.append(diff_angle(self.v[i], -self.white.axis) * 180/pi)
+                # self.angle_labels.append(label(
+                #     pos=self.beams[i][2].pos + self.beams[i][2].axis / 2,
+                #     text="{0:4.2f}deg".format(diff_angle(
+                #         self.v[i], -self.white.axis) * 180/pi),
+                #     xoffset=20 if i == 0 else -20,
+                #     yoffset=-5 if i == 0 else 5
+                # ))
             self.pos[i] += self.v[i] * 0.1
 
     def reflect(self, droplet_pos, droplet_r):
@@ -120,7 +122,7 @@ class Ray:
                 self.beams[i][0].pos = self.log[i][0]
                 self.beams[i][0].axis = self.log[i][1] - self.log[i][0]
                 self.beams[i][0].opacity = self.opacity[i][0]
-                print(f'self.opacity[{i}][0] = {self.opacity[i][0]}')
+                # print(f'self.opacity[{i}][0] = {self.opacity[i][0]}')
                 self.beams[i][0].visible = True
 
                 normal_v = norm(droplet_pos - self.pos[i])
@@ -141,78 +143,27 @@ class Ray:
             self.reflect(droplet_pos, droplet_r)
             if len(self.beams[i]) >= 3:
                 self.beams[i][2].axis = self.pos[i] - self.log[i][2]
-            if len(self.angle_labels) >= 1:
-                self.angle_labels[0].pos = self.beams[0][2].pos + \
-                    self.beams[0][2].axis / 2
-            if len(self.angle_labels) >= 2:
+            # if len(self.angle_labels) >= 1:
+            #     self.angle_labels[0].pos = self.beams[0][2].pos + \
+            #         self.beams[0][2].axis / 2
+            if len(self.exit_angles) >= 2:
                 if self.beams[i][2].opacity == 1:
                     self.beams[i][2].opacity = self.opacity[i][0] * \
                         self.opacity[i][1] * self.opacity[i][2]
-                    print(f'self.opacity[{i}][2] = {self.opacity[i][0] * self.opacity[i][1] * self.opacity[i][2]}')
-                self.angle_labels[1].pos = self.beams[5][2].pos + \
-                    self.beams[5][2].axis / 2
+                #     print(f'self.opacity[{i}][2] = {self.opacity[i][0] * self.opacity[i][1] * self.opacity[i][2]}')
+                # self.angle_labels[1].pos = self.beams[5][2].pos + \
+                #     self.beams[5][2].axis / 2
         self.pos += self.v * self.dt
         self.white.ballpos += self.white.ballv * self.dt
 
     def __del__(self):
         self.white.visible = False
         del self.white
-        while len(self.angle_labels) != 0:
-            self.angle_labels[0].visible = False
-            del self.angle_labels[0]
+        # while len(self.angle_labels) != 0:
+        #     self.angle_labels[0].visible = False
+        #     del self.angle_labels[0]
         for i in range(6):
             while len(self.beams[i]) != 0:
                 self.beams[i][0].visible = False
                 del self.beams[i][0]
 
-
-scene = canvas(
-    background=vec(1, 1, 1),
-    width=1200,
-    height=600,
-    center=vec(0, 0, 0),
-    range=10,
-    userspin=False,
-    userpan=False,
-    userzoom=True,
-    title='droplet',
-    align='left'
-)
-
-r = 5
-droplet = sphere(
-    radius=r,
-    pos=vec(0, 0, 0),
-    color=vec(195/255, 253/255, 255/255),
-    opacity=0.1
-)
-dropletCenter = sphere(radius=0.05, pos=droplet.pos, color=color.red)
-
-ray_arr = []
-
-def run2(slider):
-    if len(ray_arr) != 0:
-        while len(ray_arr) != 0:
-            del ray_arr[0]
-    for i in range(7):
-        ray_arr.append(Ray(vec(-8, (i+2.5)/2, 0), slider.value))
-        done = False
-        while not done:
-            rate(10000)
-            # try:
-            ray_arr[i].update(droplet.pos, droplet.radius)
-            # except Exception as e:
-            #     pass
-            for j in range(6):
-                # try:
-                if mag(ray_arr[i].pos[j]) >= 15:
-                    done = True
-                    break
-                # except Exception as e:
-                #     pass
-
-
-angle_slider = slider(vertical=True, max=pi/2, min=0,
-                      bind=run2, align='left', pos=scene.title_anchor)
-
-slider.value = 0
