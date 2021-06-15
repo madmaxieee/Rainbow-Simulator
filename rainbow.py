@@ -112,29 +112,30 @@ def rotate_rainbow(slider):
     global main_axis, anti_axis, _rainbow, sun_light, rays
 
     angle = -slider.value
-    main_axis.axis = rotate(vec(200, 0, 0), angle)
-    anti_axis.axis = -main_axis.axis
+    new_axis = rotate(vec(200, 0, 0), angle)
+    main_axis.axis = new_axis
+    anti_axis.axis = -new_axis
 
     for i in range(6):
         _rainbow[i].axis = rotate(vec(200, 0, 0), angle)
         _rainbow[i].pos = rotate(vec(200, 0, 0), angle) / 2
 
-    sun_light[0].axis = -main_axis.axis
+    sun_light[0].axis = -new_axis
     sun_light[0].pos = _rainbow[0].pos + _rainbow[0].radius * rotate(
-        norm(main_axis.axis), pi / 2)
-    sun_light[1].axis = -main_axis.axis
+        norm(new_axis), pi / 2)
+    sun_light[1].axis = -new_axis
     sun_light[1].pos = _rainbow[5].pos + _rainbow[5].radius * rotate(
-        norm(main_axis.axis), pi / 2)
+        norm(new_axis), pi / 2)
 
     rays[0].pos = sun_light[0].pos
-    rays[0].axis = 1 / cos(42 * pi / 180) * rotate(-main_axis.axis / 2,
+    rays[0].axis = 1 / cos(42 * pi / 180) * rotate(-new_axis / 2,
                                                    42 * pi / 180)
     rays[1].pos = sun_light[0].pos
-    rays[1].axis = 1 / cos(40 * pi / 180) * rotate(-main_axis.axis / 2,
+    rays[1].axis = 1 / cos(40 * pi / 180) * rotate(-new_axis / 2,
                                                    40 * pi / 180)
     rays[2].pos = sun_light[1].pos
-    rays[2].axis = 1 / cos(42 * pi / 180) * rotate(-main_axis.axis / 2,
+    rays[2].axis = 1 / cos(42 * pi / 180) * rotate(-new_axis / 2,
                                                    42 * pi / 180)
     rays[3].pos = sun_light[1].pos
-    rays[3].axis = 1 / cos(40 * pi / 180) * rotate(-main_axis.axis / 2,
+    rays[3].axis = 1 / cos(40 * pi / 180) * rotate(-new_axis / 2,
                                                    40 * pi / 180)
