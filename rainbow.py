@@ -116,10 +116,8 @@ def rotate_rainbow(slider):
     anti_axis.axis = -main_axis.axis
 
     for i in range(6):
-        _rainbow[i].visible = False
-        _rainbow[i].axis = main_axis.axis
-        _rainbow[i].pos = main_axis.axis / 2
-        _rainbow[i].visible = True
+        _rainbow[i].axis = rotate(vec(200, 0, 0), angle)
+        _rainbow[i].pos = rotate(vec(200, 0, 0), angle) / 2
 
     sun_light[0].axis = -main_axis.axis
     sun_light[0].pos = _rainbow[0].pos + _rainbow[0].radius * rotate(
