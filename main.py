@@ -44,8 +44,8 @@ def run_droplet(slider):
         red_ang_dot = gdots(color=color.red, graph=y_to_angle)
         vlt_ang = gcurve(color=color.purple, graph=y_to_angle)
         vlt_ang_dot = gdots(color=color.purple, graph=y_to_angle)
-    for i in range(8):
-        ray_arr.append(Ray(vec(-8, (i + 2) / 2, 0), slider.value))
+    for i in range(17):
+        ray_arr.append(Ray(vec(-8, (i + 4) / 4, 0), slider.value))
         done = False
         while not done:
             rate(10000)
@@ -65,6 +65,8 @@ def run_droplet(slider):
                         vlt_ang_dot.plot(y_dist, ray_arr[i].exit_angles[1])
                         break
             except IndexError:
+                pass
+            except ValueError:
                 pass
 
 

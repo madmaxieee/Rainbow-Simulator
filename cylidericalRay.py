@@ -16,6 +16,19 @@ scene = canvas(
     caption='droplet',
 )
 
+
+def Rs(i, t, n1=1, n2=1):
+    theta_c = asin(min(n2 / n1, 1))
+    k = (pi / 2) / theta_c
+    return k * (sin(t - i) / sin(t + i))**2
+
+
+def Rp(i, t, n1=1, n2=1):
+    theta_c = asin(min(n2 / n1, 1))
+    k = (pi / 2) / theta_c
+    return k * (tan(t - i) / tan(t + i))**2
+
+
 class Ray:
     def __init__(self, _pos=vec(0, 0, 0), angle=0):
         self.incidence_y = _pos.y
@@ -91,11 +104,6 @@ class Ray:
     # does refract if there is one
     # param type = 'in' or 'out'
     def refract(self, droplet_pos, droplet_r):
-        def Rs(i, t):
-            return (sin(t - i) / sin(t + i))**2
-
-        def Rp(i, t):
-            return (tan(t - i) / tan(t + i))**2
 
         for i in range(6):
             if not self.in_lens[i] and self.reflected[i] == 0 and mag(
@@ -133,8 +141,8 @@ class Ray:
             normal_v *= -1 if type == 'out' else 1
             angle_in = diff_angle(self.v[i], normal_v)
             angle_out = asin(n1 / n2 * sin(angle_in))
-            self.opacity[i].append(
-                1 - (Rs(angle_in, angle_out) + Rp(angle_in, angle_out)) / 2)
+            self.opacity[i].append(1 - (Rs(angle_in, angle_out, n1, n2) +
+                                        Rp(angle_in, angle_out, n1, n2)) / 2)
             self.v[i] = rotate(normal_v,
                                angle=angle_out,
                                axis=cross(normal_v, self.v[i]))
@@ -152,12 +160,6 @@ class Ray:
             self.pos[i] += self.v[i] * 0.1
 
     def reflect(self, droplet_pos, droplet_r):
-        def Rs(i, t):
-            return (sin(t - i) / sin(t + i))**2
-
-        def Rp(i, t):
-            return (tan(t - i) / tan(t + i))**2
-
         for i in range(6):
             if self.in_lens[i] and self.reflected[i] == 0 and mag(
                     droplet_pos - self.pos[i]) >= 0.999 * droplet_r:
@@ -171,11 +173,12 @@ class Ray:
                 self.beams[i][0].visible = True
 
                 normal_v = norm(droplet_pos - self.pos[i])
+                n1 = nwater[i]
+                n2 = nair
                 angle_in = diff_angle(-self.v[i], normal_v)
                 angle_out = asin(nwater[i] / nair * sin(angle_in))
-                self.opacity[i].append(
-                    (Rs(angle_in, angle_out) + Rp(angle_in, angle_out)) / 2)
-
+                self.opacity[i].append((Rs(angle_in, angle_out, n1, n2) +
+                                        Rp(angle_in, angle_out, n1, n2)) / 2)
                 angle_ref = diff_angle(-self.v[i], normal_v)
                 self.v[i] = rotate(normal_v,
                                    angle=angle_ref,
