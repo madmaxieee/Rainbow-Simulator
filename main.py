@@ -44,7 +44,7 @@ def run_droplet(slider):
         red_ang_dot = gdots(color=color.red, graph=y_to_angle)
         vlt_ang = gcurve(color=color.purple, graph=y_to_angle)
         vlt_ang_dot = gdots(color=color.purple, graph=y_to_angle)
-    for i in range(17):
+    for i in range(16):
         ray_arr.append(Ray(vec(-8, (i + 4) / 4, 0), slider.value))
         done = False
         while not done:
